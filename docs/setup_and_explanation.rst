@@ -89,7 +89,7 @@ The AIE is integrated in AMD's CPUs (referred to as the *Ryzen AI* Series) and c
 |            | VC2802     | AIE-ML     | 304       |                 |
 |            +------------+------------+-----------+-----------------+
 |            | ???        | AIE-MLv2   | 0         | Discontinued    |
-|            |            |            |           |[#v70-product]_  |
+|            | Alveo v70  |            |           |[#v70-product]_  |
 |            |            |            |           | Product details |
 |            |            |            |           | are dubious     |
 |            +------------+------------+-----------+-----------------+
@@ -112,7 +112,7 @@ The AIE is integrated in AMD's CPUs (referred to as the *Ryzen AI* Series) and c
 +------------+------------+------------+-----------+-----------------+
 |            | VHK158     | N/A        | 0         | Eval kit        |
 | Versal     +------------+------------+-----------+-----------------+
-| HBM        | VM1102     | N/A        | 0         |                 |
+| HBM        | VM1102     | N/A        | 0         |                 | 
 |            | VM1302     |            |           |                 |
 |            | VM1402     |            |           |                 |
 |            | VM1502     |            |           |                 |
