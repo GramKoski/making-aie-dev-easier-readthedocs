@@ -188,7 +188,7 @@ Since the naming scheme does little distinguate the differences accross versions
 +------------------------+-----------------------+-----------------------+-----------------------------+
 |      Feature           | AIE1 Tile             | AIE-ML Tile           | AIE-MLv2 Tile (Lack of Doc) |
 +========================+=======================+=======================+=============================+
-|      Clock Speed       | 1GHz [*]_             | 1 GHz [*]_            | ??                          |
+|      Clock Speed [*]_  | 1GHz                  | 1 GHz                 | ??                          |
 +------------------------+-----------------------+-----------------------+-----------------------------+
 |   Per Tile Data Memory | 32 KiB                | 64 KiB + (125-750     | ??                          |
 |                        | 4 Memory banks        | KiB Shared)           |                             |
@@ -254,8 +254,8 @@ So far, XDNA2 only exists for customers in the *Strix Point*. And while details 
 **FAQ**
 *******
 
-**Q**: *What does XDNA stand for?*
-**A**: Nobody knows. Some speculate Xilinx DNA. Maybe eXtreme DNA (like the AMD XCD Chiplet). But we can't find any official statement.
+| **Q**: *What does XDNA stand for?*
+| **A**: Nobody knows. Some speculate Xilinx DNA. Maybe eXtreme DNA (like the AMD XCD Chiplet). But we can't find any official statement.
 
 | **Q**: *How should I choose between the AIE1 or AIE-ML(vX)?*
 | **A**: Official AMD documentation:
@@ -265,7 +265,7 @@ So far, XDNA2 only exists for customers in the *Strix Point*. And while details 
 **Q**: *Does the the AI in AIE really stand for Artificial Intelligence? Not Adaptive or Accelerated Integration or Intellgence?*
 **A**: While this does seem like an obvious question, we could not find the AIE referred to as Artificial Intelligence Engine anywhere. So while there is not a good amount of sources, a definitive source is the 2018 `Xilinx (WP506) "AI Engines and Their Applications" <https://spiritelectronics.com/pdf/wp506-ai-engine.pdf>`_, which specifies AI stands for Artificial Intelligence.
 
-.. [*]
+.. [*] 
 **Q**: *Erm, the* `XDNA page <https://www.amd.com/en/technologies/xdna.html>`_ *shows that AIE-ML configuration only has a horizontal cascade stream only on the top row. It also says the AIE-ML engines run at 1.3 GHz, not 1 GHz*
 **A**: You're absolutely correct! It does! But the AIE-ML documentation shows a horizontal cascade stream for all tiles and a normal 1 GHz. [#AIE-ML-arch-manual]_ But since the wording on the XDNA page says the AIE-ML can 'run over 1.3GHz', perhaps there is some clock frequency beyond FMax in the documentation at play.
 
