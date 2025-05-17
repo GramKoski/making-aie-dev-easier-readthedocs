@@ -10,7 +10,6 @@ Before starting our programming we first want to have an idea of the architectur
 
 The AI Engine suite of tools includes a compiler and both a software and hardware emulator. Vitis itself includes features to trace signals, generate dataflow graphs, show data movement over hardware and cycle time, profile the kernel and io, and much more. While the process of compiling and emulation can be done from command line tools, to use more advanced analysis will require Vitis IDE. All of these tools are freely available for download by AMD. You will also need an AMD AIE `build license <https://www.xilinx.com/getlicenses>`_.
 
-<<<<<<< Updated upstream
 ----------------------
 Background
 ----------------------
@@ -27,8 +26,6 @@ The AMD AI Engine has gone through a few iterations that change the support and 
 
 The AIE is integrated in AMD's CPUs (referred to as the *Ryzen AI* Series) and certain AMD *Versal* FPGA SoC. It has kept its name through the Xilinx acquisition, as *Versal* was originally given and planned by Xilinx way back in 2018. [#unveiled-versal]_ Because only certain Versal SoCs include the AIE, we include a small list of their products here. We also make an important make an important distinction that AMD's Alveo Accelerator cards are not an addition to this list, as the Alveo V80 and Alveo V70 are Versal SoCs, hence the **V** in the naming convention. [#Alveo-p-guide]_ And that the VCK5000 is another outlier.
 
-=======
->>>>>>> Stashed changes
 
 **First Generation Versal SoC Series Table**
 
