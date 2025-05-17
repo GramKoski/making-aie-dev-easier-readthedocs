@@ -6,8 +6,8 @@ Making AIE Development Easier
    :maxdepth: 2
 
    setup_and_explanation
+   vs_cpu_gpu
    vector_addition
    matrix_multiplication
    convolution
-   nueral_network
-
+   neural_network
