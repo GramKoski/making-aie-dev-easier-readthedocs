@@ -112,7 +112,7 @@ The definition of the our `aie_vadd_stream()` kernel. It takes in a stream of in
 
 Vitis's analyzation is very useful to looking at the synthesized dataflow. Our final array view shows how the plio blocks stream into the AIE itself and streams the results back into an output. Notice that it does not use any of the tile's local memory.
 
-.. image:: _static/image/vec_add_stream.png
+.. image:: image/vec_add_stream.png
    :alt: Vector addition stream diagram
    :width: 100pt
    :align: center
@@ -225,7 +225,7 @@ We also provide a second implementation of vector add. In this example, we use b
 
 The final array image shows us the usage of multiple tiles. Although the kernel runs in a single one, the usage of memory spreads throughout an adjacent tile.
 
-.. image:: _static/image/vec_add_buffer.png
+.. image:: image/vec_add_buffer.png
    :width: 100pt
    :alt: Vector addition buffer diagram
    :align: center
