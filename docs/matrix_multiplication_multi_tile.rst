@@ -1,13 +1,13 @@
 Simple Multi-Tile Matrix Multiplication (16x16x16)
 ====================================================
 
-Here I will discuss the simple implentation of tiled matrix multiplication. We split both 16x16 matrices into 4x4 blocks. Within one block, row-major format is used. For matrix A, at the block level, we use row-major access, aswell. For matrix B, we use a block-level column-major scheme.
+The int16 mmul api class offers 4x4x4 built-in matrix multiplication. Both 16x16 input matrices are split into 4x4 blocks. Within a block, row-major format is used. For matrix A, at the block-level, row-major format is used as well. For matrix B, a block-level column-major scheme.
 
+*Include diagram of tiling here*
 
+Within a kernel, each corresponding block from A and B are multiplied and those partial results are summed together. The mmul class provides the ``mmul::mac()`` function with will perform acc = acc + A*B where acc is the (vectorized) values in the accumulator register.
 
-If you need to calculate larger matrix multiplications within one tile, it is necessary to split the matrices into blocks and/or accumulate partial results. The mmul class provides the ``mmul::mac()`` function with will perform acc = acc + A*B where acc is the (vectorized) values in the accumulator register.
-
-Note that the AIE API docs provide template kernel code for calculating larger matrices within one tile [1]_, but here we give our own simple implementation.
+Note that the AIE API docs provides a more general GEMM example kernel [1]_ for reference.
 
 File structure:
 ::
@@ -22,7 +22,8 @@ File structure:
 Kernel Code (kernels.cpp)
 ****************************
 
-Here is an example of a kernel that performs 4x16x4 matrix multiplication for int16. Note that there is no mmul class to accomodate the larger matrix size. Instead the computation is broken up into 4x4x4 multiplications and partial results are added together using mmul::mac().
+Here is an example of a kernel that performs 4x16x4 matrix multiplication for int16. There is no mmul class to accommodate the larger matrix size. Instead the computation is broken up into 4x4x4 multiplications and partial results are added together using mmul::mac().
+The sizes provided by the mmul class are limited by the width of the accumulator register, which is by default 48 bits for int16.
 
 .. code-block:: cpp
 
@@ -54,12 +55,12 @@ Here is an example of a kernel that performs 4x16x4 matrix multiplication for in
         *c_iter = m.to_vector<int16>();
     }
 
-We can use our 4x16x4 kernel across multiple tiles to calculate a 16x16x16 matrix multiplication in parallel.
+The 4x16x4 kernel is duplicated across 16 tiles to calculate a 16x16x16 matrix multiplication in parallel.
 
 Graph Code (graph.h)
 *********************
 
-Here is the graph code. Note that this code broadcast the A and B matrices to all tiles. Our inputs are thus duplicated 16 times(!) in local tile memory. We will discuss alternative approaches in the next section, but this serves as a simple reference example.
+Here is the graph code. Note that this code broadcast the A and B matrices to all tiles. The inputs are thus duplicated 16 times(!) in local tile memory. More memory-efficient approaches are discussed in the next section, but this serves as a simple reference example.
 
 .. code-block:: cpp
 
@@ -125,8 +126,8 @@ Here is the graph code. Note that this code broadcast the A and B matrices to al
 Host Code (host.cpp)
 *********************
 
-The host code calls our graph and sets the hyper-parameters a_block_param and b_block_param. These parameters can be thought of as threadIDs from GPU programming. They allow a kernel to know which block of the larger matrix it should compute.
-These parameters are streamed in as initial data packets prior to the other data. These are static parameters that don't change during runtime. We will discuss a way to set these kernel parameters during compile-time in the next module.
+The host code calls the graph and sets the hyper-parameters a_block_param and b_block_param. These parameters can be thought of as threadIDs from GPU programming. They allow a kernel to know which block of the larger matrix it should compute.
+These parameters are streamed in as initial data packets prior to the other data. These are static parameters that don't change during runtime. Alternative ways to set these kernel parameters during compile-time are discussed in the next module.
 
 .. code-block:: cpp
 
@@ -156,13 +157,14 @@ These parameters are streamed in as initial data packets prior to the other data
 
 AIE Grid Array View
 ****************************
-If we perform software simulation of the above code with Vitis, we are given the following view of the AIE grid.
-.. image:: image/16x16x16array.svg
+AMD Vitis software simulation provides a grid view of the AIE array:
+
+.. image:: image/16x16x16_array.svg
    :alt: Simple multi-tile matmul grid layout
-   :width: 100pt
+   :width: 600px
    :align: center
 
-You can see that the 4x4 kernel grid is mapped to the bottom left corner of the AIE grid as specified in the graph code. Note the double buffering which is automatically applied from plio to local tile buffers. If double buffering will exceed the memory limit of the local tiles, you can disable it with ``single_buffer(port<T>&)`` [2]_.
+The 4x4 kernel grid is mapped to the bottom left corner of the AIE grid as specified in the graph code. Note the double buffering which is automatically applied from plio to local tile buffers. If double buffering will exceed the memory limit of the local tiles, you can disable it with ``single_buffer(port<T>&)`` [2]_.
 
 
 .. rubric:: References

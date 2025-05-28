@@ -1,13 +1,13 @@
 Multi-Tile Matrix Multiplication with Adder-Tree
 ====================================================
-Note that in the previous example, the entire inner dimension of the matrix multiplication was kept intact. This inner dimension is the symbolized by K in an NxKxM matrix multplication which means AxB where A is MxK and B is KxN.
+Note that in the Simple Multi-Tile Matrix Multiplication Example (16x16x16), the entire inner dimension of the matrix multiplication was kept intact and was not split across different tiles. This inner dimension is the symbolized by K in an NxKxM matrix multplication which means AxB where A is MxK and B is KxN.
 
-Keeping the inner dimesion intact means that we can use each kernel to perform matrix multiplication directly without summing results between kernels. This is useful for smaller matrices, but when the inner dimension is large, in order to perserve memory and computes bounds it becomes necessary to split the inner dimension and sum results between kernels.
+Keeping the inner dimesion intact means that each kernel to perform matrix multiplication directly without summing results between kernels. This is useful for smaller matrices, but when the inner dimension is large, in order to perserve memory and computes bounds it becomes necessary to split the inner dimension and sum results between kernels.
 
-There are multiple ways to communicate and accumlate outputs between kernels. One method would be to use the cascade stream which streams data directly between accumulator registers of neighboring kernels. Instead, what we do is place matrix multiplication tiles adjacent to a central addition kernel (``add_tree.cpp``). This addition tile reads the output buffers directly from its neighboring tile's memory and accumulates partial results.
+There are multiple ways to communicate and accumlate outputs between kernels. One method would be to use the cascade stream which streams data directly between accumulator registers of neighboring kernels. Instead, this code example places matrix multiplication tiles adjacent to a central addition kernel (``add_tree.cpp``). The addition tile reads the output buffers directly from its neighboring tile's memory and accumulates partial results.
 
 
-We illustrate this method with an int16 4x128x128 matrix multiplication example across 4 tiles. Here, the matrix multiplication kernel (``mmul_skinny.cpp``) uses aie::mac and aie::mul intrinsics for higher configurability. Note that the input K dimension must be a multiple of 32.
+This adder-tree method is illustrated with an int16 4x128x128 matrix multiplication example across 4 tiles. Here, the matrix multiplication kernel (``mmul_skinny.cpp``) uses aie::mac and aie::mul intrinsics for higher configurability. Note that the input K dimension must be a multiple of 32.
 
 File structure:
 ::
@@ -22,9 +22,9 @@ File structure:
 Kernel Code
 *************
 Note that the additional kernel is labeled ``mmul_skinny`` because it works on dimensions 4x32x128. So, the A matrix is relatively skinny with a large K dimension.
-We use N = 4, M = 128, K = 128. The K_Tile variable reflects the inner dimension of the matrix multiplication that is performed on each of the 4 tiles. Thus K_Tile = K/4.
+The global variables N = 4, M = 128, K = 128 match the multiplication dimension. The K_Tile variable reflects the inner dimension of the matrix multiplication that is performed on each of the 4 tiles. The inner dimension is split evenly across the 4 tiles, so K_Tile = K/4.
 
-Additionally, note that that multiplying 2 int16 vector registers through aie::mac fills a default 48-bit accmulator register. These results are cast back to int16 vectors with the to_vector<int16>() method. This method automatically saturated to avoid integer overflow.
+Additionally, note that that multiplying 2 int16 vector registers through aie::mac fills a default 48-bit accmulator register. These results are cast back to int16 vectors with the to_vector<int16>() method. This method automatically saturates the data to avoid integer overflow.
 
 ``kernels.cpp``:
 ::
@@ -64,7 +64,6 @@ Additionally, note that that multiplying 2 int16 vector registers through aie::m
             }
             a_iter -= K_Tile/32;
                 aie::vector<int16, 32> res_vec = acc.template to_vector<int16>();
-                int16_t res = aie::reduce_add(res_vec);
                 *c_iter++ = res;  
             }
             a_iter += K/32;
@@ -178,8 +177,9 @@ The a_block_param ports are used to pass the block index which corresponds to th
 
 AIE Grid View
 ****************
-Through software simulation, you can visualize the layout of the kernels. Note how output buffers of the mmul kernels are read directly into the adder tree kernel, by passing the AXI4 stream.
+Through software simulation, the kernel layout is visualized. Note how output buffers of the mmul kernels are read directly into the adder tree kernel, bypassing the AXI4 stream.
+
 .. image:: image/4x128x128_array.svg
    :alt: Adder-tree Matmul Grid Layout 
-   :width: 100pt
+   :width: 600px
    :align: center
