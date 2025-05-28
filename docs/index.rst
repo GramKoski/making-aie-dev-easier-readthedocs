@@ -8,6 +8,8 @@ Making AIE Development Easier
    setup_and_explanation
    vs_cpu_gpu
    vector_addition
-   matrix_multiplication
+   matrix_multiplication_single_tile
+   matrix_multiplication_multi_tile
+   matrix_multiplication_adder_tree
    convolution
-   neural_network
+   nueral_network
