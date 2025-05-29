@@ -160,7 +160,7 @@ A much more reliable method to inspect the number and generation of AIE is to op
 
 CPUs are much easier. AIE in this context is always an NPU, from either architecture XDNA or XDNA2. These different architectures use either AIE-ML or AIE-MLv2 respetively. 
 
-AMD makes this list of AMD Ryzen AI CPUs so much easier to find. The generations to have NPUs are Ryzen 7040 (*"Phoenix"*), Ryzen 8040 (*"Hawk Point"*), and Ryzen 300 (*"Strix Point*"). [#adv-ai-keynote]_ You can view a complete list of processors that have an NPU at `AMD Ryzen AI <https://www.amd.com/en/products/processors/consumer/ryzen-ai.html>`_. 
+AMD makes this list of AMD Ryzen AI CPUs so much easier to find. The generations to have NPUs are Ryzen 7040 (*"Phoenix"*), Ryzen 8040 (*"Hawk Point"*), and Ryzen 300 (*"Strix Point*"). [#adv-ai-keynote]_ . Additionally, there are also rumors of Krackan Point, a mobile APU [#krackan]_ .You can view a complete list of processors that have an NPU at `AMD Ryzen AI <https://www.amd.com/en/products/processors/consumer/ryzen-ai.html>`_. 
 
 +---------------+------------+-----------+---------------------+
 | Series        | AIE-Type   | Number    | Notes               |
@@ -280,6 +280,7 @@ So far, XDNA2 only exists for customers in the *Strix Point*. And while details 
 .. [#unveiled-versal] https://www.prnewswire.com/news-releases/xilinx-unveils-versal-the-first-in-a-new-category-of-platforms-delivering-rapid-innovation-with-software-programmability-and-scalable-ai-inference-300721588.html
 .. [#v70-product] https://www.prnewswire.com/news-releases/xilinx-unveils-versal-the-first-in-a-new-category-of-platforms-delivering-rapid-innovation-with-software-programmability-and-scalable-ai-inference-300721588.html
 .. [#Galapagos] https://utoronto.scholaris.ca/server/api/core/bitstreams/5291f76d-e009-4f40-ac31-49252e4fe20c/content
+.. [#krackan] https://wccftech.com/amd-next-gen-strix-halo-krackan-point-ryzen-ai-zen-5-apus-confirmed/
 .. [#adv-ai-keynote] https://www.amd.com/content/dam/amd/en/documents/advancing-ai-keynote.pdf#page=79
 .. [#Ryzen-AI] https://www.amd.com/en/products/processors/consumer/ryzen-ai.html
 .. [#strix-xdna2] https://www.anandtech.com/show/21469/amd-details-ryzen-ai-300-series-for-mobile-strix-point-with-rdna-35-igpu-xdna-2-npu/2
