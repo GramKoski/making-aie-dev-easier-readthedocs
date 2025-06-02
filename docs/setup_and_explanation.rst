@@ -160,7 +160,7 @@ A much more reliable method to inspect the number and generation of AIE is to op
 
 CPUs are much easier. AIE in this context is always an NPU, from either architecture XDNA or XDNA2. These different architectures use either AIE-ML or AIE-MLv2 respetively. 
 
-AMD makes this list of AMD Ryzen AI CPUs so much easier to find. The generations to have NPUs are Ryzen 7040 (*"Phoenix"*), Ryzen 8040 (*"Hawk Point"*), and Ryzen 300 (*"Strix Point*"). [#adv-ai-keynote]_ . Additionally, there are also rumors of Krackan Point, a mobile APU [#krackan]_ .You can view a complete list of processors that have an NPU at `AMD Ryzen AI <https://www.amd.com/en/products/processors/consumer/ryzen-ai.html>`_. 
+AMD makes this list of AMD Ryzen AI CPUs so much easier to find. The generations to have NPUs are Ryzen 7040 (*"Phoenix"*), Ryzen 8040 (*"Hawk Point"*), and Ryzen 300 (*"Strix Point*"). [#adv-ai-keynote]_ . Additionally, there are also mentions of Krackan Point, a mobile APU [#krackan]_ .You can view a complete list of processors that have an NPU at `AMD Ryzen AI <https://www.amd.com/en/products/processors/consumer/ryzen-ai.html>`_. 
 
 +---------------+------------+-----------+---------------------+
 | Series        | AIE-Type   | Number    | Notes               |
@@ -248,7 +248,7 @@ So far, XDNA2 only exists for customers in the *Strix Point*. And while details 
  - 2x Perf/W
 [#zen5]_ 
 [#zen5-slides]_
-[#zen5-anandtech]_
+[#strix-xdna2]_
 
 
 **FAQ**
@@ -262,12 +262,12 @@ So far, XDNA2 only exists for customers in the *Strix Point*. And while details 
 | 
 |   *The initial version, AI Engine (AIE), is optimized for DSP and communication applications, while the AI Engine-Machine Learning (AIE-ML) introduces a version optimized for machine learning.* [#AIE-ML-arch-manual-diff]_
 
-**Q**: *Does the the AI in AIE really stand for Artificial Intelligence? Not Adaptive or Accelerated Integration or Intellgence?*
-**A**: While this does seem like an obvious question, we could not find the AIE referred to as Artificial Intelligence Engine anywhere. So while there is not a good amount of sources, a definitive source is the 2018 `Xilinx (WP506) "AI Engines and Their Applications" <https://spiritelectronics.com/pdf/wp506-ai-engine.pdf>`_, which specifies AI stands for Artificial Intelligence.
+| **Q**: *Does the the AI in AIE really stand for Artificial Intelligence? Not Adaptive or Accelerated Integration or Intellgence?*
+| **A**: While this does seem like an obvious question, we could not find the AIE referred to as Artificial Intelligence Engine anywhere. So while there is not a good amount of sources, a definitive source is the 2018 `Xilinx (WP506) "AI Engines and Their Applications" <https://spiritelectronics.com/pdf/wp506-ai-engine.pdf>`_, which specifies AI stands for Artificial Intelligence.
 
-.. [*] 
-**Q**: *Erm, the* `XDNA page <https://www.amd.com/en/technologies/xdna.html>`_ *shows that AIE-ML configuration only has a horizontal cascade stream only on the top row. It also says the AIE-ML engines run at 1.3 GHz, not 1 GHz*
-**A**: You're absolutely correct! It does! But the AIE-ML documentation shows a horizontal cascade stream for all tiles and a normal 1 GHz. [#AIE-ML-arch-manual]_ But since the wording on the XDNA page says the AIE-ML can 'run over 1.3GHz', perhaps there is some clock frequency beyond FMax in the documentation at play.
+| .. [*] 
+| **Q**: *Erm, the* `XDNA page <https://www.amd.com/en/technologies/xdna.html>`_ *shows that AIE-ML configuration only has a horizontal cascade stream only on the top row. It also says the AIE-ML engines run at 1.3 GHz, not 1 GHz*
+| **A**: You're absolutely correct! It does! But the AIE-ML documentation shows a horizontal cascade stream for all tiles and a normal 1 GHz. [#AIE-ML-arch-manual]_ But since the wording on the XDNA page says the AIE-ML can 'run over 1.3GHz', perhaps there is some clock frequency beyond FMax in the documentation at play. There are also a couple of other mistakes in press releases like `Ryzen AI Announcement <https://www.4gamers.com.tw/news/detail/58488/amd-announce-ryzen-7040hs-sreies-processors-with-xdna-technoligy>`_ but it is showing AIE not AIE-ML. The tiles in the `AMD products guide <https://www.amd.com/en/products/adaptive-socs-and-fpgas/technologies/ai-engine.html>`_ is wrong because the cascades do no alternate. Yeah, there are a few errors here and there.
 
 
 .. [#AIE-Tech] https://www.amd.com/en/products/adaptive-socs-and-fpgas/technologies/ai-engine.html
@@ -290,4 +290,3 @@ So far, XDNA2 only exists for customers in the *Strix Point*. And while details 
 .. [#AIE-ML-arch-manual-diff] https://docs.amd.com/r/en-US/am020-versal-aie-ml/Key-Differences-between-AI-Engine-and-AIE-ML
 .. [#zen5] https://www.youtube.com/watch?v=a0tvIZIdk-o
 .. [#zen5-slides] https://www.slideshare.net/slideshow/amd-zen-5-architecture-deep-dive-from-tech-day/270466492
-.. [#zen5-anandtech] https://www.anandtech.com/show/21469/amd-details-ryzen-ai-300-series-for-mobile-strix-point-with-rdna-35-igpu-xdna-2-npu/2
