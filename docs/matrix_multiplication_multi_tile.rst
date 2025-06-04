@@ -1,9 +1,19 @@
 Simple Multi-Tile Matrix Multiplication (16x16x16)
 ====================================================
 
-The int16 mmul api class offers 4x4x4 built-in matrix multiplication. Both 16x16 input matrices are split into 4x4 blocks. Within a block, row-major format is used. For matrix A, at the block-level, row-major format is used as well. For matrix B, a block-level column-major scheme.
+The int16 mmul API class offers 4x4x4 built-in matrix multiplication. The following program calculates A*B=C where A, B, and C are matrices, and the computation is split across 16 tiles. Both 16x16 input matrices are split into 4x4 blocks. Within a block, row-major format is used. For matrix A, at the block-level, row-major format is used as well. For matrix B, a block-level column-major scheme is implemented.
 
-*Include diagram of tiling here*
+.. image:: image/A_matrix.png
+   :alt: The tiling scheme is for the input matrix A
+   :width: 300px
+   :align: center
+
+.. image:: image/B_matrix.png
+   :alt: The tiling scheme is for the input matrix B 
+   :width: 300px
+   :align: center
+
+
 
 Within a kernel, each corresponding block from A and B are multiplied and those partial results are summed together. The mmul class provides the ``mmul::mac()`` function with will perform acc = acc + A*B where acc is the (vectorized) values in the accumulator register.
 
