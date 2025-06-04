@@ -12,4 +12,5 @@ Making AIE Development Easier
    matrix_multiplication_multi_tile
    matrix_multiplication_adder_tree
    convolution
-   nueral_network
+   neural_network
+   using_constraints
