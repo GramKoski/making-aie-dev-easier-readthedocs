@@ -66,9 +66,18 @@ If you'll notice, this kernel will just take a single input. We don't wish to do
 
       source(kernel_move) = "src/kernels/kernels.cpp";
 
+    }
+
+  };
+
+
+And this code will leave to the vitis placer to decide where everything is stored and how it is stored. If we want more control over this, we can use *constraints*. We append the following to the `AIEGraph()` constructor.
+
+::
+
       // Constraints //
 
-      // Single Buffering is an inefficient but easier to keep buffers in one place (Don't do this for speed. You want the ping-pong (double buffering) feature)
+      // Single Buffering is an inefficient technique, but uses half as many buffers (Don't do this for speed. You want the ping-pong (double buffering) feature)
       single_buffer(kernel_move.in[0]);
       single_buffer(kernel_move.out[0]);
 
@@ -78,23 +87,22 @@ If you'll notice, this kernel will just take a single input. We don't wish to do
 
       location<kernel>(kernel_move) = tile(0, 7);
       location<stack> (kernel_move) = address(0, 7, 24576);
-    }
-
-  };
-
 
 You'll notice we put the constraints under a certain point. While the graph code does not care where you define the constraints, we will write the cosntraints together for simplicity. Below we show a comparison and the differences.
 
-.. figure:: image/unconstrained_move.svg
-   :alt: "Unconstrained"
-   :width: 100
-   :class: float-left
 
-.. figure:: image/constrained_move.svg
-   :alt: "Constrained"
-   :width: 150
-   :class: float-right
+.. list-table:: Comparison of their respective array graph.
+   :widths: 30 70
+   :header-rows: 1
 
+   * - Unconstrained
+     - Constrained
+   * - .. figure:: image/unconstrained_move.svg 
+          :width: 200
+          :alt: "Unconstrained"                 
+
+     - .. figure:: image/constrained_move.svg
+          :alt: "Constrained"                
 
 
 +------------------------+------------------------------------+
@@ -154,7 +162,6 @@ The graph code will define constraints. You'll also notice the definition of mul
 
   class AIEGraph : public adf::graph {
           private:
-                  //int N = PLATFORM_WIDTH * PLATFORM_HEIGHT;
                   kernel kernel_move[N];
           public:
                   input_plio plio_in;
@@ -253,8 +260,8 @@ The graph code will define constraints. You'll also notice the definition of mul
 *Feel free to click on the array diagram directly. They are vector graphics, so you can really zoom in.*
 
 
------------------
-How MaxEVA did it
------------------
-
-TODO:
+.. -----------------
+.. How MaxEVA did it
+.. -----------------
+.. 
+.. TODO:
