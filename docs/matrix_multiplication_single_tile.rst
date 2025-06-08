@@ -121,13 +121,6 @@ Host Code (graph.cpp)
         return 0;
     }
 
-AIE Grid View
-****************
-Through software simulation, you can visualize the layout of the kernels. Note how output buffers of the mmul kernels are read directly into the adder tree kernel, by passing the AXI4 stream.
-.. image:: image/4x128x128_array.svg
-   :alt: Simple multi-tile matmul grid layout
-   :width: 100pt
-   :align: center
 
 .. rubric:: References
 .. [1] AIE API mmul Class. https://www.xilinx.com/htmldocs/xilinx2023_2/aiengine_api/aie_api/doc/group__group__mmul.html
