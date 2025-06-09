@@ -6,6 +6,8 @@ Keeping the inner dimension whole allows each kernel to perform matrix multiplic
 
 There are several ways to combine outputs between kernels. One approach is to use the cascade stream to pass data directly between accumulator registers of neighboring kernels. In this example, matrix multiplication tiles are placed next to a central addition kernel (``add_tree.cpp``), which reads output buffers from its neighbors and accumulates the partial results.
 
+This design is inspired by MaxEva, a framework which maximizes matrix multiplication across tiles. [1]_
+
 .. figure:: image/adder-tree.png
    :alt: Adder-tree tiling scheme
    :width: 600px
@@ -275,3 +277,5 @@ Through software simulation, the kernel layout is visualized. Note how output bu
    :alt: Adder-tree Matmul Grid Layout 
    :width: 600px
    :align: center
+
+.. [1] MaxEva: Maximizing the Efficiency of Matrix Multiplication on Versal AI Engine https://arxiv.org/pdf/2311.04980v2
