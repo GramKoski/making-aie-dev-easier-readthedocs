@@ -11,7 +11,7 @@ There are several ways to combine outputs between kernels. One approach is to us
    :width: 600px
    :align: center
 
-This adder-tree method is demonstrated with an int16 4x128x128 matrix multiplication spread across 4 tiles. The matrix multiplication kernel (``mmul_skinny.cpp``) uses aie::mac and aie::mul intrinsics for flexibility. The K dimension must be a multiple of 32.
+This adder-tree method is demonstrated with an int16 4x128x128 matrix multiplication spread across 4 tiles. The matrix multiplication kernel (``mmul_skinny.cpp``) uses ``aie::mac`` and ``aie::mul`` intrinsics for flexibility. The K dimension must be a multiple of VEC. VEC is the vectorization factor, and VEC = 16 in our case because of length limits on the default 48-bit accumulator register for int16.
 
 File structure:
 
