@@ -1,77 +1,149 @@
 Multi-Tile Matrix Multiplication with Adder-Tree
 ====================================================
-Note that in the Simple Multi-Tile Matrix Multiplication Example (16x16x16), the entire inner dimension of the matrix multiplication was kept intact and was not split across different tiles. This inner dimension is the symbolized by K in an NxKxM matrix multplication which means AxB where A is MxK and B is KxN.
+In the Simple Multi-Tile Matrix Multiplication Example (16x16x16), the entire inner dimension (K) of the matrix multiplication is kept intact and not split across tiles. Here, K represents the inner dimension in an NxKxM multiplication, where A is MxK and B is KxN.
 
-Keeping the inner dimesion intact means that each kernel to perform matrix multiplication directly without summing results between kernels. This is useful for smaller matrices, but when the inner dimension is large, in order to perserve memory and computes bounds it becomes necessary to split the inner dimension and sum results between kernels.
+Keeping the inner dimension whole allows each kernel to perform matrix multiplication independently, without needing to sum results between kernels. This is efficient for small matrices, but for large K, splitting the inner dimension and accumulating results between kernels helps manage memory and compute resources.
 
-There are multiple ways to communicate and accumlate outputs between kernels. One method would be to use the cascade stream which streams data directly between accumulator registers of neighboring kernels. Instead, this code example places matrix multiplication tiles adjacent to a central addition kernel (``add_tree.cpp``). The addition tile reads the output buffers directly from its neighboring tile's memory and accumulates partial results.
+There are several ways to combine outputs between kernels. One approach is to use the cascade stream to pass data directly between accumulator registers of neighboring kernels. In this example, matrix multiplication tiles are placed next to a central addition kernel (``add_tree.cpp``), which reads output buffers from its neighbors and accumulates the partial results.
 
-
-This adder-tree method is illustrated with an int16 4x128x128 matrix multiplication example across 4 tiles. Here, the matrix multiplication kernel (``mmul_skinny.cpp``) uses aie::mac and aie::mul intrinsics for higher configurability. Note that the input K dimension must be a multiple of 32.
+This adder-tree method is demonstrated with an int16 4x128x128 matrix multiplication spread across 4 tiles. The matrix multiplication kernel (``mmul_skinny.cpp``) uses aie::mac and aie::mul intrinsics for flexibility. The K dimension must be a multiple of 32.
 
 File structure:
+
 ::
+
   .
-  ├── graph.hpp # Declaration of the graph
+  ├── graph.h # Declaration of the graph
   ├── graph.cpp  # Initializes, runs, and ends the graph.
   ├── kernels
-  │   └── kernels.cpp # matmul kernel implementation
+  │   └── mmul.cpp # matmul kernel implementation
   │   └── add_tree.cpp # addition kernel implementation
-  └── kernels.hpp # declarations of kernel
+  └── kernels.h # declarations of kernel
 
 Kernel Code
 *************
-Note that the additional kernel is labeled ``mmul_skinny`` because it works on dimensions 4x32x128. So, the A matrix is relatively skinny with a large K dimension.
-The global variables N = 4, M = 128, K = 128 match the multiplication dimension. The K_Tile variable reflects the inner dimension of the matrix multiplication that is performed on each of the 4 tiles. The inner dimension is split evenly across the 4 tiles, so K_Tile = K/4.
+The multiplication kernel is called ``mmul_skinny`` because it operates on 4x32x128 dimensions, where the A matrix is skinny with a large K.
 
-Additionally, note that that multiplying 2 int16 vector registers through aie::mac fills a default 48-bit accmulator register. These results are cast back to int16 vectors with the to_vector<int16>() method. This method automatically saturates the data to avoid integer overflow.
+    The global variables N = 4, M = 128, K = 128 set the multiplication size. The variable K_Tile represents the portion of the inner dimension handled by each of the 4 tiles, so K_Tile = K/4.
 
-``kernels.cpp``:
+When multiplying two int16 vectors with ``aie::mac``, results are stored in a 48-bit accumulator. These are cast back to int16 vectors using ``to_vector<int16>()``, which automatically saturates the data to prevent overflow.
+
+This approach uses kernel classes with attributes for configuration. The graph code instantiates and runs these kernel classes, passing the appropriate parameters. The ``a_block`` parameter in ``mmul_skinny`` acts like a thread ID, determining which part of the A matrix each kernel processes. The B matrix is split into 4x128 blocks, so no ``b_block`` parameter is needed. While previous designs used scalar port streaming for this, the class-based approach sets these parameters at compile time.
+
+``kernels.h``:
+
 ::
+
+    #include <adf.h>
+
+    using namespace adf;
+
+    // Matrix multiplication kernel for tiled processing
+    class mmul_skinny {
+        int K;       // Inner dimension (cols of A / rows of B)
+        int M;       // Columns of output matrix (C)
+        int T;       // Number of tiles
+        int a_block; // Tile/block ID for parallel execution
+    public:
+        mmul_skinny(int K_val, int M_val, int T_val, int id) 
+            : K(K_val), M(M_val), T(T_val), a_block(id) {}
+
+        void run(adf::input_buffer<int16>& a_buf,
+                adf::input_buffer<int16>& b_buf,
+                adf::output_buffer<int16>& c_buf);
+
+        // ADF framework registration (exposes parameters to toolchain)
+        static void registerKernelClass() {
+            REGISTER_FUNCTION(mmul_skinny::run);
+            REGISTER_PARAMETER(K);
+            REGISTER_PARAMETER(M);
+            REGISTER_PARAMETER(T);
+            REGISTER_PARAMETER(a_block);
+        }
+    };
+
+    // 4-input adder tree for output matrix columns (M)
+    class add_tree_4 {
+        int M; // Columns of output matrix
+    public:
+        add_tree_4(int M_val) : M(M_val) {}
+
+        void run(
+            adf::input_buffer<int16>& in0, 
+            adf::input_buffer<int16>& in1,  
+            adf::input_buffer<int16>& in2,
+            adf::input_buffer<int16>& in3,
+            adf::output_buffer<int16>& out);
+
+        static void registerKernelClass() {
+            REGISTER_FUNCTION(add_tree_4::run);
+            REGISTER_PARAMETER(M);
+        }
+    };
+
+
+``mmul.cpp``:
+
+.. code-block:: cpp
+
     #include <aie_api/aie.hpp>
     #include <aie_api/aie_adf.hpp>
     #include "include.h"
     #include "kernels.h"
 
-    int K_Tile = K/4;
-
     using namespace adf;
 
-    void mmul_skinny(
+    void mmul_skinny::run(
         input_buffer<int16>& a_buf,
         input_buffer<int16>& b_buf, 
-        output_buffer<int16>& c_buf,
-        int a_block)
+        output_buffer<int16>& c_buf)
     {
-        auto a_iter = aie::begin_vector<32>(a_buf) + K_Tile/32*a_block;
+        // Set hardware-accelerated rounding/saturation modes
+        aie::set_rounding(aie::rounding_mode::symmetric_zero);	   
+        aie::set_saturation(aie::saturation_mode::saturate);
+
+        const int K_Tile = K/T; // Tiling factor for dimension K
+
+        // Offset A-matrix pointer for parallel block processing
+        auto a_iter = aie::begin_vector<VEC>(a_buf) + K_Tile/VEC*a_block;
         auto c_iter = aie::begin(c_buf);
 
+        // Outer loop over N - batch dimension
         for (int n = 0; n < N; ++n) {
-            auto b_iter = aie::begin_vector<32>(b_buf);
+            auto b_iter = aie::begin_vector<VEC>(b_buf);
+            // M dimension - rows of output matrix
             for (int m = 0; m < M; ++m) {
-                aie::accum<acc48, 32> acc = aie::zeros<acc48, 32>();
-            aie::vector<int16, 32> a_vec;
-            aie::vector<int16, 32> b_vec;
-            for (int k = 0; k < K_Tile/32; ++k) {
-                a_vec = *a_iter++;
-                b_vec = *b_iter++;
+                aie::accum<acc48, VEC> acc = aie::zeros<acc48, VEC>();
+            aie::vector<int16, VEC> a_vec;
+            aie::vector<int16, VEC> b_vec;
+            
+            // Inner K_Tile loop unrolled by VEC (vectorization factor)
+            for (int k = 0; k < K_Tile/VEC; ++k) {
+                a_vec = *a_iter++;  // Vector load from A
+                b_vec = *b_iter++;  // Vector load from B
                     
-                if (k == 0) {
-                    acc = aie::mul(a_vec, b_vec);
-                } else {
-                acc = aie::mac(acc, a_vec, b_vec);
-                }
+                // First multiply, subsequent MACs (fused multiply-accumulate)
+                acc = (k == 0) ? aie::mul(a_vec, b_vec) : aie::mac(acc, a_vec, b_vec);
             }
-            a_iter -= K_Tile/32;
-                aie::vector<int16, 32> res_vec = acc.template to_vector<int16>();
-                *c_iter++ = res;  
+            a_iter -= K_Tile/VEC; // Rewind A pointer for next M iteration
+
+                // Convert 48b accumulator to 16b with saturation
+                aie::vector<int16, VEC> res_vec16 = acc.to_vector<int16>();
+
+                // Horizontal sum of vector results
+                int16 res = aie::reduce_add(res_vec16);
+                *c_iter++ = res; // Store scalar result
             }
-            a_iter += K/32;
+            a_iter += K/VEC; // Advance A pointer to next N block
         }
     }
 
+Here is the kernel for the adder tree. It reads 4 input buffers from neighboring tiles and sums them together.
+
 ``add_tree.cpp``:
+
 ::
+
     #include <aie_api/aie.hpp>
     #include <aie_api/aie_adf.hpp>
     #include "include.h"
@@ -114,10 +186,14 @@ Additionally, note that that multiplying 2 int16 vector registers through aie::m
 
 Graph Code
 ***************
-The a_block_param ports are used to pass the block index which corresponds to the section of the A matrix that should be processed by each kernel. Each kernel is carefully mapped to a specific adjacent tile to ensure direct read/write buffer access between the addition tile and the multiplication tiles. Without direct buffering between adjacent tiles, bandwidth may be lowered when data is forced to be streamed through the 32 bit AXI4 interface. 
+ Each kernel is carefully mapped to a specific adjacent tile to ensure direct read/write buffer access between the addition tile and the multiplication tiles. Without direct buffering between adjacent tiles, bandwidth may be lowered when data is forced to be streamed through the 32 bit AXI4 interface. 
+
+ Note the change in syntax when calling the kernels. The kernels are called with the correct values for the class wrapper parameters. K = 128, M = 128, T = 4, and a_block is set to the tile ID (0-3).
 
 ``graph.hpp``:
+
 ::
+
     #include <adf.h>
     #include "kernels.h"
     #include <aie_api/aie_adf.hpp>
@@ -125,53 +201,64 @@ The a_block_param ports are used to pass the block index which corresponds to th
 
     using namespace adf;
 
-    class SingleTileTest : public adf::graph {
+    // Graph for 4-tile, 128x128 matrix multiplication
+    class mmul_4x128x128 : public adf::graph {
+    private:
+        const unsigned int K = 128; // Inner dimension
+        const unsigned int M = 128; // Output columns
+        const unsigned int T = 4;   // Number of tiles
+
     public:
-            kernel mmul[4];
-        kernel add;
+        kernel mmul[4]; // 4 parallel matrix multiplication kernels
+        kernel add;     // 4-input adder tree kernel
 
-        input_plio in_A;
-        input_plio in_B[4];
-        output_plio out_C;
+        input_plio in_A;      // Input for matrix A
+        input_plio in_B[4];   // 4 inputs for matrix B tiles
+        output_plio out_C;    // Output for matrix C
 
-        input_port a_block_param[4];
-
-        SingleTileTest() {
+        mmul_128x128() {
+            // Create input and output streams
             in_A = input_plio::create(plio_128_bits, "data/A_matrix.txt");
             out_C = output_plio::create(plio_128_bits, "data/C_output.txt");
 
-        add = kernel::create(add_tree);
-        source(add) = "src/kernels/add_tree.cpp";
-        runtime<ratio>(add) = 1.0;
-        dimensions(add.out[0]) = {N*M};
-            connect(add.out[0], out_C.in[0]);
+            // Create 4-input adder tree kernel for final accumulation
+            add = kernel::create_object<add_tree_4>(M);
+            source(add) = "src/kernels/add_tree.cpp";
+            runtime<ratio>(add) = 1.0;
 
-        for (int i = 0; i < 4; ++i) {
-            dimensions(add.in[i]) = {N*M};
+            dimensions(add.out[0]) = {N*M};   // Output is full matrix
+            dimensions(add.in[4]) = {M};      // Each input is a column block
+
+            connect(add.out[0], out_C.in[0]); // Connect adder output to final output
+
+            // Instantiate and connect 4 mmul kernels, each handling a tile
+            for (unsigned int i = 0; i < N; ++i) {
+                dimensions(add.in[i]) = {N*M};
                 in_B[i] = input_plio::create(plio_128_bits, "data/B_"+std::to_string(i)+ ".txt");
-            
-                mmul[i] = kernel::create(mmul_skinny);
 
+                // Each mmul kernel gets its tile/block ID as 'i'
+                mmul[i] = kernel::create_object<mmul_skinny>(K, M, T, i);
                 runtime<ratio>(mmul[i]) = 1.0;
 
-                dimensions(mmul[i].in[0]) = {N*K};
-                dimensions(mmul[i].in[1]) = {M*(K/4)};
-                dimensions(mmul[i].out[0]) = {N*M};
+                // Set input/output buffer shapes for each kernel
+                dimensions(mmul[i].in[0]) = {N*K};         // A: full row block
+                dimensions(mmul[i].in[1]) = {M*(K/T)};     // B: tile (partitioned K)
+                dimensions(mmul[i].out[0]) = {N*M};        // Output: full matrix block
 
-                connect(in_A.out[0], mmul[i].in[0]);
-                connect(in_B[i].out[0], mmul[i].in[1]);
-                connect(mmul[i].out[0], add.in[i]);
+                // Connect data streams
+                connect(in_A.out[0], mmul[i].in[0]);       // Broadcast A to all mmuls
+                connect(in_B[i].out[0], mmul[i].in[1]);    // Unique B for each tile
+                connect(mmul[i].out[0], add.in[i]);        // Each mmul feeds one adder input
 
-            // Connect parameter ports
-            connect(a_block_param[i], mmul[i].in[2]);
+                source(mmul[i]) = "src/kernels/mmul.cpp";
+            }
 
-                source(mmul[i]) = "src/kernels/kernels.cpp";
-        }
-        location<kernel>(add) = tile(0, 1);
-        location<kernel>(mmul[0]) = tile(0, 0);
-        location<kernel>(mmul[1]) = tile(1, 1);
-        location<kernel>(mmul[2]) = tile(0, 2);
-        location<kernel>(mmul[3]) = tile(1, 0);
+            // Map kernels to hardware tiles for parallel execution
+            location<kernel>(add) = tile(0, 1);
+            location<kernel>(mmul[0]) = tile(0, 0);
+            location<kernel>(mmul[1]) = tile(1, 1);
+            location<kernel>(mmul[2]) = tile(0, 2);
+            location<kernel>(mmul[3]) = tile(1, 0);
         }
     };
 
