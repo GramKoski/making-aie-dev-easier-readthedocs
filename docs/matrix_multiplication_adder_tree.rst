@@ -156,22 +156,21 @@ Here is the kernel for the adder tree. It reads 4 input buffers from neighboring
 
     using namespace adf;
 
-    // Assume N*M is multiple of 32 for vector alignment
-    void add_tree(
+    // Assume N*M is multiple of VEC for vector alignment
+    void add_tree_4::run(
         input_buffer<int16>& in0,  // North neighbor
         input_buffer<int16>& in1,  // East neighbor  
         input_buffer<int16>& in2,  // South neighbor
         input_buffer<int16>& in3,  // West neighbor
         output_buffer<int16>& out
     ) {
-        // Vector iterators for 32-element parallel processing
-        auto in0_iter = aie::begin_vector<32>(in0);
-        auto in1_iter = aie::begin_vector<32>(in1);
-        auto in2_iter = aie::begin_vector<32>(in2);
-        auto in3_iter = aie::begin_vector<32>(in3);
-        auto out_iter = aie::begin_vector<32>(out);
+        // Vector iterators for VEC-element parallel processing
+        auto in0_iter = aie::begin_vector<VEC>(in0);
+        auto in1_iter = aie::begin_vector<VEC>(in1);
+        auto in2_iter = aie::begin_vector<VEC>(in2);
+        auto in3_iter = aie::begin_vector<VEC>(in3);
+        auto out_iter = aie::begin_vector<VEC>(out);
 
-        constexpr int VEC = 32;
         const int total_vectors = (N * M) / VEC;
 
         // Process all elements in vector chunks
@@ -188,6 +187,7 @@ Here is the kernel for the adder tree. It reads 4 input buffers from neighboring
             *out_iter++ = sum;
         }
     }
+ 
 
 Graph Code
 ***************
