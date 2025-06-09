@@ -4,7 +4,7 @@ In the Simple Multi-Tile Matrix Multiplication Example (16x16x16), the entire in
 
 Keeping the inner dimension whole allows each kernel to perform matrix multiplication independently, without needing to sum results between kernels. This is efficient for small matrices, but for large K, splitting the inner dimension and accumulating results between kernels helps manage memory and compute resources.
 
-There are several ways to combine outputs between kernels. One approach is to use the cascade stream to pass data directly between accumulator registers of neighboring kernels. In this example, matrix multiplication tiles are placed next to a central addition kernel (``add_tree.cpp``), which reads output buffers from its neighbors and accumulates the partial results.
+There are several ways to combine outputs between kernels. One approach is to use the cascade stream to pass data directly between accumulator registers of neighboring kernels. Here, we present a different approach. In this example, matrix multiplication tiles are placed next to a central addition kernel (``add_tree.cpp``), which reads output buffers from its neighbors and accumulates the partial results.
 
 This design is inspired by MaxEva, a framework which maximizes matrix multiplication across tiles. [1]_
 
