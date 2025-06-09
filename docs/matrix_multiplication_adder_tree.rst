@@ -6,6 +6,11 @@ Keeping the inner dimension whole allows each kernel to perform matrix multiplic
 
 There are several ways to combine outputs between kernels. One approach is to use the cascade stream to pass data directly between accumulator registers of neighboring kernels. In this example, matrix multiplication tiles are placed next to a central addition kernel (``add_tree.cpp``), which reads output buffers from its neighbors and accumulates the partial results.
 
+.. figure:: image/adder-tree.png
+   :alt: Adder-tree tiling scheme
+   :width: 600px
+   :align: center
+
 This adder-tree method is demonstrated with an int16 4x128x128 matrix multiplication spread across 4 tiles. The matrix multiplication kernel (``mmul_skinny.cpp``) uses aie::mac and aie::mul intrinsics for flexibility. The K dimension must be a multiple of 32.
 
 File structure:
