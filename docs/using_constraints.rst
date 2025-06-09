@@ -88,7 +88,7 @@ And this code will leave to the vitis placer to decide where everything is store
       location<kernel>(kernel_move) = tile(0, 7);
       location<stack> (kernel_move) = address(0, 7, 24576);
 
-You'll notice we put the constraints under a certain point. While the graph code does not care where you define the constraints, we will write the cosntraints together for simplicity. Below we show a comparison and the differences.
+While we have chosen to append this to the end of the constructor, the graph code does not care where you define the constraints. But we will write the constraints after we define the rest of the graph readability. Below we show a comparison and the differences.
 
 
 .. list-table:: Comparison of their respective array graph.
