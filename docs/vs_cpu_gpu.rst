@@ -47,6 +47,14 @@ Because the architecture revolves around this idea of dataflow graphs and that d
 For example, say we want to write 2 kernels that we want to do something, say one does a computation and the second encrypts that output. In a traditional CPU and GPU architecture these kernels are loaded as instructions into the cores of their systems, and only when the first kernel is finished does the second run. Furthermore to share information in between kernels they will have to have written to a shared cache, where nearly all other cores can view and share the same info. But in the AIE we can load different kernels to neighboring tiles, and then perform our kernels on that data while sharing that data availability to a very limited amount of neighbors or specific tiles. And while it is technically possible to assign different kernels to different CPU cores/GPU, this isn't very effective or a design that is kept in mind.
 
 
+------------------------
+2 Challenges
+------------------------
+1. Optimizing data movement and tile placement
+2. Limited local memory per tile (32 KB)
+
+In Making AIE Easier, we seek to address these challenges.
+
 ----------------------
 A Look In Depth
 ----------------------

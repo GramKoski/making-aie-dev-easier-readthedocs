@@ -8,7 +8,7 @@ There are several ways to combine outputs between kernels. One approach is to us
 
 This design is inspired by MaxEva, a framework which maximizes matrix multiplication across tiles. [1]_
 
-.. figure:: image/adder-tree.png
+.. figure:: image/add_tree.png
    :alt: Adder-tree tiling scheme
    :width: 600px
    :align: center
