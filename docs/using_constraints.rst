@@ -15,7 +15,7 @@ Imagine a kernel that takes a buffer, does some computation, and returns it into
 
 `kernels.cpp`:
 
-::
+.. code-block :: cpp
   
   #include <aie_api/aie.hpp>
   #include <adf.h>
@@ -33,8 +33,8 @@ Imagine a kernel that takes a buffer, does some computation, and returns it into
 
 If you'll notice, this kernel will just take a single input. We don't wish to do anything here, just show the purpose of constraints. You'll also notice that the kernel does not care about placement. These restrictions should be kept inside the graph code. Inside `graph.h`:
 
-::
-  
+.. code-block :: cpp
+
   #include <adf.h>
   #include "kernels.h"
   #include "kernels/include.h"
@@ -73,7 +73,7 @@ If you'll notice, this kernel will just take a single input. We don't wish to do
 
 And this code will leave to the vitis placer to decide where everything is stored and how it is stored. If we want more control over this, we can use *constraints*. We append the following to the `AIEGraph()` constructor.
 
-::
+.. code-block :: cpp
 
       // Constraints //
 
@@ -132,7 +132,7 @@ It almost looks like a shoots and ladders board game. We can move our data and c
 
 `kernels/include.h`: 
 
-:: 
+.. code-block :: cpp
 
   #ifndef FUNCTION_INCLUDES_H
   #define FUNCTION_INCLUDES_H
@@ -149,7 +149,7 @@ The graph code will define constraints. You'll also notice the definition of mul
 `graph.h`
 
 
-::
+.. code-block :: cpp
 
   #include <adf.h>
   #include "kernels.h"

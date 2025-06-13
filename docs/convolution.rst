@@ -6,7 +6,7 @@ While, explicit convolution is not necessarily the most "natural" operation for 
 Kernel code (kernel.cpp)
 --------------------------
 
-::
+.. code-block :: cpp
     
     #include <aie_api/aie.hpp>
     #include <aie_api/aie_adf.hpp>
@@ -63,7 +63,7 @@ Kernel code (kernel.cpp)
 Graph code (graph.h)
 ----------------------
 
-::
+.. code-block :: cpp
 
     #include <adf.h>
     #include "kernels.h"
@@ -115,7 +115,7 @@ Graph code (graph.h)
 Host Code (host.cpp)
 -----------------------
 
-::
+.. code-block :: cpp
 
     #include <adf.h>
     #include "graph.h"

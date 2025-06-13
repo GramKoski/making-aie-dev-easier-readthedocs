@@ -23,7 +23,7 @@ We will take a look inside the files for how we define the graph and call the ke
 
 Our Top-level File will initialize our graph and control the times it is ran. But the definition of the dataflow itself is stored in ``graph.hpp``.
 
-::
+.. code-block :: cpp
   
   #include "graph.hpp"
 
@@ -31,6 +31,7 @@ Our Top-level File will initialize our graph and control the times it is ran. Bu
 
   int main(int argc, char** argv) {
     vadd_graph.init();
+    // Run graph for 128 samples
     vadd_graph.run(128);
     vadd_graph.end();
 
@@ -39,22 +40,23 @@ Our Top-level File will initialize our graph and control the times it is ran. Bu
 
 The dataflow graph is a class that extends the graph functionality. It can be made up of a multiple kernels, snippets of code that will run on the AIE tiles. While multiple kernels can run per tile, a kernel is not split between tiles. 
 
-Our graph itself must define the data flow before it is ready to call on the kernels. In our implementation we use ``input_plio`` to stream our data from our ``plio`` memory to connect to the inputs of our kernel. We also need to specify the dimensions of our types from our inputs as well as our outputs. We use a ``stream`` to tell Vitis that we want to load via the stream interface and run the graph for 128 samples. After we will look at an alternative implementation that uses buffers instead of streams.
+Our graph itself must define the data flow before it is ready to call on the kernels. In our implementation we use ``input_plio`` to stream our data from our ``plio`` memory to connect to the inputs of our kernel. We also need to specify the dimensions of our types from our inputs as well as our outputs. We use a ``stream`` to tell Vitis that we want to load via the stream interface and run the graph for 128 samples. Later, we will look at an alternative implementation that uses buffers instead of streams.
 
 ``graph.hpp``:
 
-::
-  
+.. code-block :: cpp
+
   #include <adf.h>
-  #include  "kernels.hpp"
+  #include "kernels.hpp"
 
   using namespace adf;
 
+  // Defines a simple AI Engine graph
   class simpleGraph : public graph {
     private:
-      kernel vadd;
+      kernel vadd; // Vector addition kernel
 
-    public: 
+    public:
       input_plio p_in0;
       input_plio p_in1;
       output_plio p_out0;
@@ -63,29 +65,29 @@ Our graph itself must define the data flow before it is ready to call on the ker
         vadd = kernel::create(aie_vadd_stream);
         source(vadd) = "kernels/vadd_stream.cc";
 
+        // PLIOs mapped to text files for simulation I/O
         p_in0 = input_plio::create("data_in0", plio_32_bits, "data/input0.txt");
         p_in1 = input_plio::create("data_in1", plio_32_bits, "data/input1.txt");
         p_out0 = output_plio::create("data_out0", plio_32_bits, "data/output.txt");
 
-
-        // connect ports and kernel
-
+        // Connect PLIOs and kernel using streams
         connect<stream>(p_in0.out[0], vadd.in[0]);
         connect<stream>(p_in1.out[0], vadd.in[1]);
         connect<stream>(vadd.out[0], p_out0.in[0]);
-        
-        // kernel runtime ratio
+
+        // Set kernel runtime ratio for scheduling
         runtime<ratio>(vadd) = 1;
       };
   };
+
 
 
 Standard usage of a header file for declaration. We use this file to list our kernels, which for this example is limited to a single one. 
 
 ``kernels.hpp``:
 
-::
-  
+.. code-block :: cpp
+
   #include <adf/stream/types.h>
 
   void aie_vadd_stream(input_stream_int32 *data_in0, input_stream_int32 *data_in1, output_stream_int32 *data_out0);

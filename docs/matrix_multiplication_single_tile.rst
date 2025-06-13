@@ -5,6 +5,8 @@ The AIE API is a C++ library which provides a convenient set of functions and cl
 The AIE API offers a mmul class [1]_ which includes methods for performing matrix multiplication on vectorized matrices. The class is declared with the size of the multiplication (MxKxN) and a data type.
 The ``mmul::mat()`` function writes the result of A*B where A is MxK and B is KxN to an accumulator register. You can optionally declare a desired accumulator precision. The default precision can be found in the docs by TypeAxTypeB multiplication.
 
+Note that this example is very simple, but we will build off of it in the next section to create a multi-tile matrix multiplication example.
+
 File structure:
 ::
 

@@ -39,7 +39,7 @@ This approach uses kernel classes with attributes for configuration. The graph c
 
 ``kernels.h``:
 
-::
+.. code-block :: cpp
 
     #include <adf.h>
 
@@ -149,7 +149,7 @@ Here is the kernel for the adder tree. It reads 4 input buffers from neighboring
 
 ``add_tree.cpp``:
 
-::
+.. code-block :: cpp
 
     #include <aie_api/aie.hpp>
     #include <aie_api/aie_adf.hpp>
@@ -199,7 +199,7 @@ Graph Code
 
 ``graph.hpp``:
 
-::
+.. code-block :: cpp
 
     #include <adf.h>
     #include "kernels.h"
