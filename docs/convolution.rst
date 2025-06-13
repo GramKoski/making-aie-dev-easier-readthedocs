@@ -1,10 +1,12 @@
 Convolution Example
 ======================
 
-While, explicit convolution is not necessarily the most "natural" operation for the AI Engine. A simple example of 2D convolution with a 3x3 mask on an 8x8 image is provided for reference.
+While explicit convolution is not necessarily the most friendly operation for the AI Engine. A simple example of 2D convolution with a 3x3 mask on an 8x8 image is provided for reference.
 
 Kernel code (kernel.cpp)
 --------------------------
+
+This 3x3 convolution kernel for the AI Engine illustrates direct memory access using the .data() method provided by the AI Engine API's buffer classes. The .data() method returns a random-access iterator, which behaves like a pointer and allows for array-style indexing and pointer arithmetic on the underlying buffer, enabling straightforward access to input, weight, and output data in contiguous memory regions
 
 .. code-block :: cpp
     
@@ -58,7 +60,9 @@ Kernel code (kernel.cpp)
                 outPtr[y * OUTPUT_WIDTH + x] = sum;
             }
         }
-}
+    }
+
+For this simple example, the graph and host code are relatively straightforward. You can learn more about the arrangement of the graph and host code in the previous modules like Vector Addition.
 
 Graph code (graph.h)
 ----------------------
