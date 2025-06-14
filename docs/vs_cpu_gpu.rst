@@ -47,14 +47,6 @@ Because the architecture revolves around this idea of dataflow graphs and that d
 For example, say we want to write 2 kernels that we want to do something, say one does a computation and the second encrypts that output. In a traditional CPU and GPU architecture these kernels are loaded as instructions into the cores of their systems, and only when the first kernel is finished does the second run. Furthermore to share information in between kernels they will have to have written to a shared cache, where nearly all other cores can view and share the same info. But in the AIE we can load different kernels to neighboring tiles, and then perform our kernels on that data while sharing that data availability to a very limited amount of neighbors or specific tiles. And while it is technically possible to assign different kernels to different CPU cores/GPU, this isn't very effective or a design that is kept in mind.
 
 
-------------------------
-2 Challenges
-------------------------
-1. Optimizing data movement and tile placement
-2. Limited local memory per tile (32 KB)
-
-In Making AIE Easier, we seek to address these challenges.
-
 ----------------------
 A Look In Depth
 ----------------------
@@ -90,6 +82,15 @@ Probably the biggest difference in compute from the AIE processors is that they 
   *Source: AMD Docs* [#ug1079]_
 
 A single AIE-1 Tile. You can see the AIE processor on the left, and the AIE memory module on the right. Note that on the AIE-1, the AIE processor and the memory module are mirrored depending on the row, alternating in even and odd rows. On the AIE-MLvX, there is no alternating. All tiles are facing the same direction.
+
+------------------------------
+Two Central Challenges
+------------------------------
+1. **Limited Streaming Bandwidth and Tile Placement:** Limited streaming bandwidth between tiles makes the physical placement of kernels a critical factor. Since the architecture is designed around a network of interconnected tiles, data transfers between non-adjacent tiles can quickly become bottlenecked by network congestion and the relatively small AXI4 stream width of 32 bits. As a result, programmers are compelled to carefully co-locate tightly coupled kernels in neighboring tiles and minimize the distance that data must travel often done through *AIE Vitis Constraints*. This often requires thoughtful partitioning of algorithms and a strategic approach to mapping workloads, ensuring that the most communication-intensive operations occur between adjacent tiles to maximize throughput.
+
+2. **Local Memory Constraints:** Second, the severe memory constraints on each local tile further complicate efficient programming. With only a small amount of dedicated memory per tile (32KB), developers must fit code, data, and input/output buffers into a very limited space. Programmers are often forced to break down large datasets into smaller blocks, carefully schedule memory usage, or offloading strategies to external memory to avoid stalls and underutilization of compute resources. These challenges demand an understanding of the AIE’s architectural nuances and a deliberate placement of buffers data sharing between neighboring kernels.
+
+In Making AIE Development Easier, we seek to address these challenges by providing a set of references and technniques to help developers on their AIE programming journey.
 
 .. At this point we would like a comparison of the occupancy of our AIE units, but we don't have enough data yet for a proper comparison. At some point, the authors will add more to this section.
 
