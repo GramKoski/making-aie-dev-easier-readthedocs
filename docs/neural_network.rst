@@ -1,6 +1,9 @@
 MNIST Multi-Layer Perceptron
 ============================
-Here we provide a full MLP for the MNIST data set. The input dimension is 28x28 which is flatten to a vector of 784 grayscale values (0 - 255). Inference is done with int16 weights on the AI Engine with an add-tree matrix multiplication design. A batch dimension of 4 is used to stay within the bounds of the local tile memory (32 KB). 
+
+NOTE: This example is a work in progress. (Not finished) Please open a PR if you would like to add your example.
+
+Here we provide a simple MLP for the MNIST data set. The input dimension is 28x28 which is flatten to a vector of 784 grayscale values (0 - 255). Inference is done with int16 weights on the AI Engine with an add-tree matrix multiplication design. A batch dimension of 4 is used to stay within the bounds of the local tile memory (32 KB). 
 
 We use the following architecture. The activations are RELU and the classifier function is simple `argmax`.
 
